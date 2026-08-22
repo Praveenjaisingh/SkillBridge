@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-brand-radial text-gray-800 antialiased;
+    }
+
+    ::selection {
+        @apply bg-brand-200 text-brand-900;
+    }
+}
+
+@layer utilities {
+    .scrollbar-thin::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        @apply rounded-full bg-brand-300;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        @apply bg-transparent;
+    }
+}
