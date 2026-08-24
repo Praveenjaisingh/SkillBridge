@@ -8,6 +8,4 @@ $request = Illuminate\Http\Request::capture();
 
 $response = $app->handleRequest($request);
 
-$response->send();
 
-$app->terminate($request, $response);
