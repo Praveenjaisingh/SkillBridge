@@ -9,34 +9,37 @@ use Illuminate\Support\Collection;
 
 class QuizEloquent implements QuizContract
 {
+    protected $quiz,$queryFilterHelper;
+    public function __construct(Quiz $quiz,QueryFilterHelper $queryFilterHelper)
+    {
+        $this->quiz = $quiz;
+        $this->queryFilterHelper = $queryFilterHelper;
+    }
+
     public function all(array $filters = []): Collection
     {
-        $query = Quiz::query()->with(['course']);
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['title']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['course_id']);
-
+        $query = $this->quiz->query()->with(['course']);
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['title']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['course_id']);
         return $query->latest()->get();
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Quiz::query()->with(['course']);
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['title']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['course_id']);
-
+        $query = $this->quiz->query()->with(['course']);
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['title']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['course_id']);
         return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function find(int $id): ?Quiz
     {
-        return Quiz::query()->with(['course'])->find($id);
+        return $this->quiz->query()->with(['course'])->find($id);
     }
 
     public function create(array $data): Quiz
     {
-        return Quiz::create($data);
+        return $this->quiz->create($data);
     }
 
     public function update(Quiz $quiz, array $data): Quiz

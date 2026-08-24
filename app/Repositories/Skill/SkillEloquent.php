@@ -9,34 +9,37 @@ use Illuminate\Support\Collection;
 
 class SkillEloquent implements SkillContract
 {
+    protected $skill,$queryFilterHelper;
+    public function __construct(Skill $skill,QueryFilterHelper $queryFilterHelper)
+    {
+        $this->skill = $skill;
+        $this->queryFilterHelper = $queryFilterHelper;
+    }
+
     public function all(array $filters = []): Collection
     {
-        $query = Skill::query();
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['name', 'category', 'description']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['category']);
-
+        $query = $this->skill->query();
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['name', 'category', 'description']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['category']);
         return $query->latest()->get();
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Skill::query();
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['name', 'category', 'description']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['category']);
-
+        $query = $this->skill->query();
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['name', 'category', 'description']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['category']);
         return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function find(int $id): ?Skill
     {
-        return Skill::query()->find($id);
+        return $this->skill->query()->find($id);
     }
 
     public function create(array $data): Skill
     {
-        return Skill::create($data);
+        return $this->skill->create($data);
     }
 
     public function update(Skill $skill, array $data): Skill

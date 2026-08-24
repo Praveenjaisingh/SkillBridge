@@ -9,34 +9,37 @@ use Illuminate\Support\Collection;
 
 class CompanyEloquent implements CompanyContract
 {
+    protected $company,$queryFilterHelper;
+    public function __construct(Company $company,QueryFilterHelper $queryFilterHelper)
+    {
+        $this->company = $company;
+        $this->queryFilterHelper = $queryFilterHelper;
+    }
+
     public function all(array $filters = []): Collection
     {
-        $query = Company::query();
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['name', 'location', 'industry']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['industry']);
-
+        $query = $this->company->query();
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['name', 'location', 'industry']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['industry']);
         return $query->latest()->get();
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Company::query();
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['name', 'location', 'industry']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['industry']);
-
+        $query = $this->company->query();
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['name', 'location', 'industry']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['industry']);
         return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function find(int $id): ?Company
     {
-        return Company::query()->find($id);
+        return $this->company->query()->find($id);
     }
 
     public function create(array $data): Company
     {
-        return Company::create($data);
+        return $this->company->create($data);
     }
 
     public function update(Company $company, array $data): Company

@@ -9,34 +9,37 @@ use Illuminate\Support\Collection;
 
 class InterviewQuestionEloquent implements InterviewQuestionContract
 {
+    protected $interviewQuestion,$queryFilterHelper;
+    public function __construct(InterviewQuestion $interviewQuestion,QueryFilterHelper $queryFilterHelper)
+    {
+        $this->interviewQuestion = $interviewQuestion;
+        $this->queryFilterHelper = $queryFilterHelper;
+    }
+
     public function all(array $filters = []): Collection
     {
-        $query = InterviewQuestion::query()->with(['skill', 'programmingLanguage']);
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['question', 'category']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['difficulty', 'skill_id', 'programming_language_id']);
-
+        $query = $this->interviewQuestion->query()->with(['skill', 'programmingLanguage']);
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['question', 'category']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['difficulty', 'skill_id', 'programming_language_id']);
         return $query->latest()->get();
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = InterviewQuestion::query()->with(['skill', 'programmingLanguage']);
-
-        $query = QueryFilterHelper::applySearch($query, $filters['search'] ?? null, ['question', 'category']);
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['difficulty', 'skill_id', 'programming_language_id']);
-
+        $query = $this->interviewQuestion->query()->with(['skill', 'programmingLanguage']);
+        $query = $this->queryFilterHelper->applySearch($query, $filters['search'] ?? null, ['question', 'category']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['difficulty', 'skill_id', 'programming_language_id']);
         return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function find(int $id): ?InterviewQuestion
     {
-        return InterviewQuestion::query()->with(['skill', 'programmingLanguage'])->find($id);
+        return $this->interviewQuestion->query()->with(['skill', 'programmingLanguage'])->find($id);
     }
 
     public function create(array $data): InterviewQuestion
     {
-        return InterviewQuestion::create($data);
+        return $this->interviewQuestion->create($data);
     }
 
     public function update(InterviewQuestion $interviewQuestion, array $data): InterviewQuestion

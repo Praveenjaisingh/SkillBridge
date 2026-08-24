@@ -9,32 +9,35 @@ use Illuminate\Support\Collection;
 
 class BookmarkEloquent implements BookmarkContract
 {
+    protected $bookmark,$queryFilterHelper;
+    public function __construct(Bookmark $bookmark,QueryFilterHelper $queryFilterHelper)
+    {
+        $this->bookmark = $bookmark;
+        $this->queryFilterHelper = $queryFilterHelper;
+    }
+
     public function all(array $filters = []): Collection
     {
-        $query = Bookmark::query()->with(['user']);
-
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['user_id', 'bookmarkable_type']);
-
+        $query = $this->bookmark->query()->with(['user']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['user_id', 'bookmarkable_type']);
         return $query->latest()->get();
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Bookmark::query()->with(['user']);
-
-        $query = QueryFilterHelper::applyFilters($query, $filters, ['user_id', 'bookmarkable_type']);
-
+        $query = $this->bookmark->query()->with(['user']);
+        $query = $this->queryFilterHelper->applyFilters($query, $filters, ['user_id', 'bookmarkable_type']);
         return $query->latest()->paginate($perPage)->withQueryString();
     }
 
     public function find(int $id): ?Bookmark
     {
-        return Bookmark::query()->with(['user'])->find($id);
+        return $this->bookmark->query()->with(['user'])->find($id);
     }
 
     public function create(array $data): Bookmark
     {
-        return Bookmark::create($data);
+        return $this->bookmark->create($data);
     }
 
     public function update(Bookmark $bookmark, array $data): Bookmark
