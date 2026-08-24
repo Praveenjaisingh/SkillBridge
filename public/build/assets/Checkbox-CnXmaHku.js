@@ -1,0 +1,1 @@
+import{t as e}from"./app-DReiwFKh.js";var t=e(),n=`/home/praveen/Downloads/Git/SkillBridge/resources/js/Components/Checkbox.jsx`;function r({className:e=``,...r}){return(0,t.jsxDEV)(`input`,{...r,type:`checkbox`,className:`rounded border-gray-300 text-brand-600 shadow-sm focus:ring-brand-500 `+e},void 0,!1,{fileName:n,lineNumber:3,columnNumber:9},this)}export{r as t};

@@ -1,0 +1,1 @@
+import{t as e}from"./app-DReiwFKh.js";var t=e(),n=`/home/praveen/Downloads/Git/SkillBridge/resources/js/Components/InputLabel.jsx`;function r({value:e,className:r=``,children:i,...a}){return(0,t.jsxDEV)(`label`,{...a,className:`block text-sm font-semibold text-gray-700 `+r,children:e||i},void 0,!1,{fileName:n,lineNumber:8,columnNumber:9},this)}export{r as t};

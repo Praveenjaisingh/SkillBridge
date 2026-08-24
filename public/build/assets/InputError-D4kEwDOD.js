@@ -1,0 +1,1 @@
+import{t as e}from"./app-DReiwFKh.js";var t=e(),n=`/home/praveen/Downloads/Git/SkillBridge/resources/js/Components/InputError.jsx`;function r({message:e,className:r=``,...i}){return e?(0,t.jsxDEV)(`p`,{...i,className:`text-sm text-red-600 `+r,children:e},void 0,!1,{fileName:n,lineNumber:3,columnNumber:9},this):null}export{r as t};
