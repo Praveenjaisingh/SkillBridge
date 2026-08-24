@@ -19,9 +19,6 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): Response
     {
         return Inertia::render('Auth/Register');
@@ -51,7 +48,6 @@ class RegisteredUserController extends Controller
         try {
             Mail::to($user->email)->send(new WelcomeMail($user));
         } catch (\Throwable $e) {
-            // Don't block registration if the mail server is unreachable/misconfigured.
             Log::warning('Welcome email could not be sent: ' . $e->getMessage());
         }
 

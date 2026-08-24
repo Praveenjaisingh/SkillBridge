@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Course;
 
 use App\Http\Controllers\Controller;
 use App\Services\Course\CourseInterface;
+use App\Services\ProgrammingLanguage\ProgrammingLanguageInterface;
+use App\Services\Skill\SkillInterface;
 use App\Helpers\PaginationHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,20 +16,18 @@ use Throwable;
 
 class CourseController extends Controller
 {
-    public function __construct(
-        protected CourseInterface $service,
-        protected \App\Services\ProgrammingLanguage\ProgrammingLanguageInterface $programmingLanguagesService,
-        protected \App\Services\Skill\SkillInterface $skillsService,
-    ) {
+    protected $courseInterface,$programmingLanguagesInterface,$skillsInterface;
+    public function __construct(CourseInterface $courseInterface,ProgrammingLanguageInterface $programmingLanguagesInterface,SkillInterface $skillsInterface,) 
+    {
+        $this->courseInterface = $courseInterface;
+        $this->skillsInterface = $skillsInterface;
+        $this->programmingLanguagesInterface = $programmingLanguagesInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $courses = $this->service->paginate(
+            $courses = $this->courseInterface->paginate(
                 $request->only(['search', 'level', 'is_published', 'programming_language_id']),
                 PaginationHelper::perPage($request)
             );
@@ -45,15 +45,12 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
             return Inertia::render('Course/Create', [
-            'programmingLanguages' => $this->programmingLanguagesService->list(),
-            'skills' => $this->skillsService->list(),
+            'programmingLanguages' => $this->programmingLanguagesInterface->list(),
+            'skills' => $this->skillsInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Course/Create', [
@@ -62,9 +59,6 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -81,7 +75,7 @@ class CourseController extends Controller
             'skills' => 'nullable|array',
             ]);
 
-            $this->service->create($data);
+            $this->courseInterface->create($data);
 
             return redirect()->route('courses.index')->with('success', 'Course created successfully.');
         } catch (ValidationException $e) {
@@ -91,13 +85,10 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $course = $this->service->find((int) $id);
+            $course = $this->courseInterface->find((int) $id);
 
             return Inertia::render('Course/Show', [
                 'course' => $course,
@@ -110,18 +101,15 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $course = $this->service->find((int) $id);
+            $course = $this->courseInterface->find((int) $id);
 
             return Inertia::render('Course/Edit', [
                 'course' => $course,
-            'programmingLanguages' => $this->programmingLanguagesService->list(),
-            'skills' => $this->skillsService->list(),
+            'programmingLanguages' => $this->programmingLanguagesInterface->list(),
+            'skills' => $this->skillsInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Course/Edit', [
@@ -131,9 +119,6 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -150,7 +135,7 @@ class CourseController extends Controller
             'skills' => 'sometimes|nullable|array',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->courseInterface->update((int) $id, $data);
 
             return redirect()->route('courses.index')->with('success', 'Course updated successfully.');
         } catch (ValidationException $e) {
@@ -160,13 +145,10 @@ class CourseController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->courseInterface->delete((int) $id);
 
             return redirect()->route('courses.index')->with('success', 'Course deleted successfully.');
         } catch (Throwable $e) {

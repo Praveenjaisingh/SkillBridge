@@ -14,22 +14,16 @@ use Throwable;
 
 class BookmarkController extends Controller
 {
-    public function __construct(
-        protected BookmarkInterface $service,
-    ) {
+    protected $bookmarkInterface;
+    public function __construct(BookmarkInterface $bookmarkInterface) 
+    {
+        $this->bookmarkInterface == $bookmarkInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $bookmarks = $this->service->paginate(
-                $request->only(['search', 'user_id', 'bookmarkable_type']),
-                PaginationHelper::perPage($request)
-            );
-
+            $bookmarks = $this->bookmarkInterface->paginate($request->only(['search', 'user_id', 'bookmarkable_type']),PaginationHelper::perPage($request));
             return Inertia::render('Bookmark/Index', [
                 'bookmarks' => $bookmarks,
                 'filters' => $request->only(['search', 'user_id', 'bookmarkable_type']),
@@ -43,9 +37,6 @@ class BookmarkController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
@@ -58,9 +49,6 @@ class BookmarkController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -70,8 +58,7 @@ class BookmarkController extends Controller
             'bookmarkable_type' => 'required|string|max:255',
             ]);
 
-            $this->service->create($data);
-
+            $this->bookmarkInterface->create($data);
             return redirect()->route('bookmarks.index')->with('success', 'Bookmark created successfully.');
         } catch (ValidationException $e) {
             throw $e;
@@ -80,13 +67,10 @@ class BookmarkController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $bookmark = $this->service->find((int) $id);
+            $bookmark = $this->bookmarkInterface->find((int) $id);
 
             return Inertia::render('Bookmark/Show', [
                 'bookmark' => $bookmark,
@@ -98,14 +82,10 @@ class BookmarkController extends Controller
             ]);
         }
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $bookmark = $this->service->find((int) $id);
+            $bookmark = $this->bookmarkInterface->find((int) $id);
 
             return Inertia::render('Bookmark/Edit', [
                 'bookmark' => $bookmark,
@@ -117,10 +97,6 @@ class BookmarkController extends Controller
             ]);
         }
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -130,7 +106,7 @@ class BookmarkController extends Controller
             'bookmarkable_type' => 'sometimes|required|string|max:255',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->bookmarkInterface->update((int) $id, $data);
 
             return redirect()->route('bookmarks.index')->with('success', 'Bookmark updated successfully.');
         } catch (ValidationException $e) {
@@ -140,13 +116,10 @@ class BookmarkController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->bookmarkInterface->delete((int) $id);
 
             return redirect()->route('bookmarks.index')->with('success', 'Bookmark deleted successfully.');
         } catch (Throwable $e) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Lesson;
 
 use App\Http\Controllers\Controller;
 use App\Services\Lesson\LessonInterface;
+use App\Services\Course\CourseInterface;
 use App\Helpers\PaginationHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,19 +15,17 @@ use Throwable;
 
 class LessonController extends Controller
 {
-    public function __construct(
-        protected LessonInterface $service,
-        protected \App\Services\Course\CourseInterface $coursesService,
-    ) {
+    protected $lessonInterface,$coursesInterface;
+    public function __construct(LessonInterface $lessonInterface,CourseInterface $coursesInterface) 
+    {
+        $this->lessonInterface = $lessonInterface;
+        $this->coursesInterface = $coursesInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $lessons = $this->service->paginate(
+            $lessons = $this->lessonInterface->paginate(
                 $request->only(['search', 'course_id']),
                 PaginationHelper::perPage($request)
             );
@@ -44,14 +43,11 @@ class LessonController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
             return Inertia::render('Lesson/Create', [
-            'courses' => $this->coursesService->list(),
+            'courses' => $this->coursesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Lesson/Create', [
@@ -60,9 +56,6 @@ class LessonController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -76,7 +69,7 @@ class LessonController extends Controller
             'duration_minutes' => 'nullable|integer',
             ]);
 
-            $this->service->create($data);
+            $this->lessonInterface->create($data);
 
             return redirect()->route('lessons.index')->with('success', 'Lesson created successfully.');
         } catch (ValidationException $e) {
@@ -86,13 +79,10 @@ class LessonController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $lesson = $this->service->find((int) $id);
+            $lesson = $this->lessonInterface->find((int) $id);
 
             return Inertia::render('Lesson/Show', [
                 'lesson' => $lesson,
@@ -105,17 +95,14 @@ class LessonController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $lesson = $this->service->find((int) $id);
+            $lesson = $this->lessonInterface->find((int) $id);
 
             return Inertia::render('Lesson/Edit', [
                 'lesson' => $lesson,
-            'courses' => $this->coursesService->list(),
+            'courses' => $this->coursesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Lesson/Edit', [
@@ -125,9 +112,6 @@ class LessonController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -141,7 +125,7 @@ class LessonController extends Controller
             'duration_minutes' => 'sometimes|nullable|integer',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->lessonInterface->update((int) $id, $data);
 
             return redirect()->route('lessons.index')->with('success', 'Lesson updated successfully.');
         } catch (ValidationException $e) {
@@ -151,13 +135,10 @@ class LessonController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->lessonInterface->delete((int) $id);
 
             return redirect()->route('lessons.index')->with('success', 'Lesson deleted successfully.');
         } catch (Throwable $e) {

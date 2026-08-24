@@ -14,18 +14,16 @@ use Throwable;
 
 class CompanyController extends Controller
 {
-    public function __construct(
-        protected CompanyInterface $service,
-    ) {
+    protected $CompanyInterface;
+    public function __construct(CompanyInterface $CompanyInterface,) 
+    {
+        $this->CompanyInterface = $CompanyInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $companys = $this->service->paginate(
+            $companys = $this->CompanyInterface->paginate(
                 $request->only(['search', 'industry']),
                 PaginationHelper::perPage($request)
             );
@@ -43,9 +41,6 @@ class CompanyController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
@@ -58,9 +53,6 @@ class CompanyController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -74,7 +66,7 @@ class CompanyController extends Controller
             'industry' => 'nullable|string|max:255',
             ]);
 
-            $this->service->create($data);
+            $this->CompanyInterface->create($data);
 
             return redirect()->route('companies.index')->with('success', 'Company created successfully.');
         } catch (ValidationException $e) {
@@ -84,13 +76,10 @@ class CompanyController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $company = $this->service->find((int) $id);
+            $company = $this->CompanyInterface->find((int) $id);
 
             return Inertia::render('Company/Show', [
                 'company' => $company,
@@ -102,14 +91,10 @@ class CompanyController extends Controller
             ]);
         }
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $company = $this->service->find((int) $id);
+            $company = $this->CompanyInterface->find((int) $id);
 
             return Inertia::render('Company/Edit', [
                 'company' => $company,
@@ -122,9 +107,6 @@ class CompanyController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -138,7 +120,7 @@ class CompanyController extends Controller
             'industry' => 'sometimes|nullable|string|max:255',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->CompanyInterface->update((int) $id, $data);
 
             return redirect()->route('companies.index')->with('success', 'Company updated successfully.');
         } catch (ValidationException $e) {
@@ -147,14 +129,10 @@ class CompanyController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->CompanyInterface->delete((int) $id);
 
             return redirect()->route('companies.index')->with('success', 'Company deleted successfully.');
         } catch (Throwable $e) {

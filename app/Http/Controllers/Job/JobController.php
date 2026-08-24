@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Job;
 
 use App\Http\Controllers\Controller;
 use App\Services\Job\JobInterface;
+use App\Services\Company\CompanyInterface; 
+use App\Services\Skill\SkillInterface;
 use App\Helpers\PaginationHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,20 +16,18 @@ use Throwable;
 
 class JobController extends Controller
 {
-    public function __construct(
-        protected JobInterface $service,
-        protected \App\Services\Company\CompanyInterface $companiesService,
-        protected \App\Services\Skill\SkillInterface $skillsService,
-    ) {
+    protected $jobInterface,$companiesInterface,$skillsInterface;
+    public function __construct(JobInterface $jobInterface,CompanyInterface $companiesInterface,SkillInterface $skillsInterface,)
+    {
+        $this->jobInterface = $jobInterface;
+        $this->companiesInterface = $companiesInterface;
+        $this->skillsInterface = $skillsInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $jobs = $this->service->paginate(
+            $jobs = $this->jobInterface->paginate(
                 $request->only(['search', 'job_type', 'experience_level', 'is_active', 'company_id']),
                 PaginationHelper::perPage($request)
             );
@@ -45,15 +45,12 @@ class JobController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
             return Inertia::render('Job/Create', [
-            'companies' => $this->companiesService->list(),
-            'skills' => $this->skillsService->list(),
+            'companies' => $this->companiesInterface->list(),
+            'skills' => $this->skillsInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Job/Create', [
@@ -62,9 +59,6 @@ class JobController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -83,7 +77,7 @@ class JobController extends Controller
             'skills' => 'nullable|array',
             ]);
 
-            $this->service->create($data);
+            $this->jobInterface->create($data);
 
             return redirect()->route('jobs.index')->with('success', 'Job created successfully.');
         } catch (ValidationException $e) {
@@ -93,13 +87,10 @@ class JobController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $job = $this->service->find((int) $id);
+            $job = $this->jobInterface->find((int) $id);
 
             return Inertia::render('Job/Show', [
                 'job' => $job,
@@ -112,18 +103,15 @@ class JobController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $job = $this->service->find((int) $id);
+            $job = $this->jobInterface->find((int) $id);
 
             return Inertia::render('Job/Edit', [
                 'job' => $job,
-            'companies' => $this->companiesService->list(),
-            'skills' => $this->skillsService->list(),
+            'companies' => $this->companiesInterface->list(),
+            'skills' => $this->skillsInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Job/Edit', [
@@ -133,9 +121,6 @@ class JobController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -154,7 +139,7 @@ class JobController extends Controller
             'skills' => 'sometimes|nullable|array',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->jobInterface->update((int) $id, $data);
 
             return redirect()->route('jobs.index')->with('success', 'Job updated successfully.');
         } catch (ValidationException $e) {
@@ -164,13 +149,10 @@ class JobController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->jobInterface->delete((int) $id);
 
             return redirect()->route('jobs.index')->with('success', 'Job deleted successfully.');
         } catch (Throwable $e) {

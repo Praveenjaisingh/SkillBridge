@@ -4,6 +4,8 @@ namespace App\Http\Controllers\InterviewQuestion;
 
 use App\Http\Controllers\Controller;
 use App\Services\InterviewQuestion\InterviewQuestionInterface;
+use App\Services\Skill\SkillInterface;
+use App\Services\ProgrammingLanguage\ProgrammingLanguageInterface;
 use App\Helpers\PaginationHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,20 +16,18 @@ use Throwable;
 
 class InterviewQuestionController extends Controller
 {
-    public function __construct(
-        protected InterviewQuestionInterface $service,
-        protected \App\Services\Skill\SkillInterface $skillsService,
-        protected \App\Services\ProgrammingLanguage\ProgrammingLanguageInterface $programmingLanguagesService,
-    ) {
+    protected $interviewQuestionInterface,$skillsInterface,$programmingLanguagesInterface;
+    public function __construct(InterviewQuestionInterface $interviewQuestionInterface,SkillInterface $skillsInterface,ProgrammingLanguageInterface $programmingLanguagesInterface) 
+    {
+        $this->interviewQuestionInterface == $interviewQuestionInterface;
+        $this->skillsInterface =$skillsInterface;
+        $this->programmingLanguagesInterface=$programmingLanguagesInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $interviewQuestions = $this->service->paginate(
+            $interviewQuestions = $this->interviewQuestionInterface->paginate(
                 $request->only(['search', 'difficulty', 'skill_id', 'programming_language_id']),
                 PaginationHelper::perPage($request)
             );
@@ -45,15 +45,12 @@ class InterviewQuestionController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
             return Inertia::render('InterviewQuestion/Create', [
-            'skills' => $this->skillsService->list(),
-            'programmingLanguages' => $this->programmingLanguagesService->list(),
+            'skills' => $this->skillsInterface->list(),
+            'programmingLanguages' => $this->programmingLanguagesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('InterviewQuestion/Create', [
@@ -62,9 +59,6 @@ class InterviewQuestionController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -77,7 +71,7 @@ class InterviewQuestionController extends Controller
             'category' => 'nullable|string|max:255',
             ]);
 
-            $this->service->create($data);
+            $this->interviewQuestionInterface->create($data);
 
             return redirect()->route('interview-questions.index')->with('success', 'InterviewQuestion created successfully.');
         } catch (ValidationException $e) {
@@ -87,13 +81,10 @@ class InterviewQuestionController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $interviewQuestion = $this->service->find((int) $id);
+            $interviewQuestion = $this->interviewQuestionInterface->find((int) $id);
 
             return Inertia::render('InterviewQuestion/Show', [
                 'interviewQuestion' => $interviewQuestion,
@@ -106,18 +97,15 @@ class InterviewQuestionController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $interviewQuestion = $this->service->find((int) $id);
+            $interviewQuestion = $this->interviewQuestionInterface->find((int) $id);
 
             return Inertia::render('InterviewQuestion/Edit', [
                 'interviewQuestion' => $interviewQuestion,
-            'skills' => $this->skillsService->list(),
-            'programmingLanguages' => $this->programmingLanguagesService->list(),
+            'skills' => $this->skillsInterface->list(),
+            'programmingLanguages' => $this->programmingLanguagesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('InterviewQuestion/Edit', [
@@ -127,9 +115,6 @@ class InterviewQuestionController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -142,7 +127,7 @@ class InterviewQuestionController extends Controller
             'category' => 'sometimes|nullable|string|max:255',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->interviewQuestionInterface->update((int) $id, $data);
 
             return redirect()->route('interview-questions.index')->with('success', 'InterviewQuestion updated successfully.');
         } catch (ValidationException $e) {
@@ -151,14 +136,10 @@ class InterviewQuestionController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->interviewQuestionInterface->delete((int) $id);
 
             return redirect()->route('interview-questions.index')->with('success', 'InterviewQuestion deleted successfully.');
         } catch (Throwable $e) {

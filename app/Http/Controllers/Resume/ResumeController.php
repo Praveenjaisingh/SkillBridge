@@ -14,18 +14,16 @@ use Throwable;
 
 class ResumeController extends Controller
 {
-    public function __construct(
-        protected ResumeInterface $service,
-    ) {
+    protected $resumeInterface;
+    public function __construct(ResumeInterface $resumeInterface)
+    {
+        $this->resumeInterface = $resumeInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $resumes = $this->service->paginate(
+            $resumes = $this->resumeInterface->paginate(
                 $request->only(['search', 'user_id']),
                 PaginationHelper::perPage($request)
             );
@@ -43,9 +41,6 @@ class ResumeController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
@@ -58,9 +53,6 @@ class ResumeController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -71,7 +63,7 @@ class ResumeController extends Controller
             'is_primary' => 'nullable|boolean',
             ]);
 
-            $this->service->create($data);
+            $this->resumeInterface->create($data);
 
             return redirect()->route('resumes.index')->with('success', 'Resume created successfully.');
         } catch (ValidationException $e) {
@@ -81,13 +73,10 @@ class ResumeController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $resume = $this->service->find((int) $id);
+            $resume = $this->resumeInterface->find((int) $id);
 
             return Inertia::render('Resume/Show', [
                 'resume' => $resume,
@@ -100,13 +89,10 @@ class ResumeController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $resume = $this->service->find((int) $id);
+            $resume = $this->resumeInterface->find((int) $id);
 
             return Inertia::render('Resume/Edit', [
                 'resume' => $resume,
@@ -119,9 +105,6 @@ class ResumeController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -132,7 +115,7 @@ class ResumeController extends Controller
             'is_primary' => 'sometimes|nullable|boolean',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->resumeInterface->update((int) $id, $data);
 
             return redirect()->route('resumes.index')->with('success', 'Resume updated successfully.');
         } catch (ValidationException $e) {
@@ -142,13 +125,10 @@ class ResumeController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->resumeInterface->delete((int) $id);
 
             return redirect()->route('resumes.index')->with('success', 'Resume deleted successfully.');
         } catch (Throwable $e) {

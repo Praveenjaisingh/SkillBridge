@@ -14,18 +14,16 @@ use Throwable;
 
 class SkillController extends Controller
 {
-    public function __construct(
-        protected SkillInterface $service,
-    ) {
+    protected $skillInterface;
+    public function __construct(SkillInterface $skillInterface)
+    {
+        $this->skillInterface = $skillInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $skills = $this->service->paginate(
+            $skills = $this->skillInterface->paginate(
                 $request->only(['search', 'category']),
                 PaginationHelper::perPage($request)
             );
@@ -43,9 +41,6 @@ class SkillController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
@@ -58,9 +53,6 @@ class SkillController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -71,7 +63,7 @@ class SkillController extends Controller
             'description' => 'nullable|string',
             ]);
 
-            $this->service->create($data);
+            $this->skillInterface->create($data);
 
             return redirect()->route('skills.index')->with('success', 'Skill created successfully.');
         } catch (ValidationException $e) {
@@ -80,14 +72,10 @@ class SkillController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $skill = $this->service->find((int) $id);
+            $skill = $this->skillInterface->find((int) $id);
 
             return Inertia::render('Skill/Show', [
                 'skill' => $skill,
@@ -100,13 +88,10 @@ class SkillController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $skill = $this->service->find((int) $id);
+            $skill = $this->skillInterface->find((int) $id);
 
             return Inertia::render('Skill/Edit', [
                 'skill' => $skill,
@@ -119,9 +104,6 @@ class SkillController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -132,7 +114,7 @@ class SkillController extends Controller
             'description' => 'sometimes|nullable|string',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->skillInterface->update((int) $id, $data);
 
             return redirect()->route('skills.index')->with('success', 'Skill updated successfully.');
         } catch (ValidationException $e) {
@@ -141,14 +123,10 @@ class SkillController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->skillInterface->delete((int) $id);
 
             return redirect()->route('skills.index')->with('success', 'Skill deleted successfully.');
         } catch (Throwable $e) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Quiz;
 
 use App\Http\Controllers\Controller;
 use App\Services\Quiz\QuizInterface;
+use App\Services\Course\CourseInterface;
 use App\Helpers\PaginationHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,19 +15,17 @@ use Throwable;
 
 class QuizController extends Controller
 {
-    public function __construct(
-        protected QuizInterface $service,
-        protected \App\Services\Course\CourseInterface $coursesService,
-    ) {
+    protected $quizInterface,$coursesInterface;
+    public function __construct(QuizInterface $quizInterface,CourseInterface $coursesInterface) 
+    {
+        $this->quizInterface = $quizInterface;
+        $this->coursesInterface = $coursesInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $quizs = $this->service->paginate(
+            $quizs = $this->quizInterface->paginate(
                 $request->only(['search', 'course_id']),
                 PaginationHelper::perPage($request)
             );
@@ -44,14 +43,11 @@ class QuizController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
             return Inertia::render('Quiz/Create', [
-            'courses' => $this->coursesService->list(),
+            'courses' => $this->coursesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Quiz/Create', [
@@ -60,9 +56,6 @@ class QuizController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -75,7 +68,7 @@ class QuizController extends Controller
             'time_limit_minutes' => 'nullable|integer',
             ]);
 
-            $this->service->create($data);
+            $this->quizInterface->create($data);
 
             return redirect()->route('quizzes.index')->with('success', 'Quiz created successfully.');
         } catch (ValidationException $e) {
@@ -85,13 +78,10 @@ class QuizController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $quiz = $this->service->find((int) $id);
+            $quiz = $this->quizInterface->find((int) $id);
 
             return Inertia::render('Quiz/Show', [
                 'quiz' => $quiz,
@@ -104,17 +94,14 @@ class QuizController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $quiz = $this->service->find((int) $id);
+            $quiz = $this->quizInterface->find((int) $id);
 
             return Inertia::render('Quiz/Edit', [
                 'quiz' => $quiz,
-            'courses' => $this->coursesService->list(),
+            'courses' => $this->coursesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('Quiz/Edit', [
@@ -124,9 +111,6 @@ class QuizController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -139,7 +123,7 @@ class QuizController extends Controller
             'time_limit_minutes' => 'sometimes|nullable|integer',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->quizInterface->update((int) $id, $data);
 
             return redirect()->route('quizzes.index')->with('success', 'Quiz updated successfully.');
         } catch (ValidationException $e) {
@@ -149,13 +133,10 @@ class QuizController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->quizInterface->delete((int) $id);
 
             return redirect()->route('quizzes.index')->with('success', 'Quiz deleted successfully.');
         } catch (Throwable $e) {

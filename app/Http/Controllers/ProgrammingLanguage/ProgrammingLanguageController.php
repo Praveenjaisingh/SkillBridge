@@ -14,18 +14,16 @@ use Throwable;
 
 class ProgrammingLanguageController extends Controller
 {
-    public function __construct(
-        protected ProgrammingLanguageInterface $service,
-    ) {
+    protected $programmingLanguageInterface;
+    public function __construct(ProgrammingLanguageInterface $programmingLanguageInterface)
+    {
+        $this->programmingLanguageInterface = $programmingLanguageInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $programmingLanguages = $this->service->paginate(
+            $programmingLanguages = $this->programmingLanguageInterface->paginate(
                 $request->only(['search', ]),
                 PaginationHelper::perPage($request)
             );
@@ -43,9 +41,6 @@ class ProgrammingLanguageController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
@@ -58,9 +53,6 @@ class ProgrammingLanguageController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -71,7 +63,7 @@ class ProgrammingLanguageController extends Controller
             'description' => 'nullable|string',
             ]);
 
-            $this->service->create($data);
+            $this->programmingLanguageInterface->create($data);
 
             return redirect()->route('programming-languages.index')->with('success', 'ProgrammingLanguage created successfully.');
         } catch (ValidationException $e) {
@@ -81,13 +73,10 @@ class ProgrammingLanguageController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $programmingLanguage = $this->service->find((int) $id);
+            $programmingLanguage = $this->programmingLanguageInterface->find((int) $id);
 
             return Inertia::render('ProgrammingLanguage/Show', [
                 'programmingLanguage' => $programmingLanguage,
@@ -100,13 +89,10 @@ class ProgrammingLanguageController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $programmingLanguage = $this->service->find((int) $id);
+            $programmingLanguage = $this->programmingLanguageInterface->find((int) $id);
 
             return Inertia::render('ProgrammingLanguage/Edit', [
                 'programmingLanguage' => $programmingLanguage,
@@ -119,9 +105,6 @@ class ProgrammingLanguageController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -132,7 +115,7 @@ class ProgrammingLanguageController extends Controller
             'description' => 'sometimes|nullable|string',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->programmingLanguageInterface->update((int) $id, $data);
 
             return redirect()->route('programming-languages.index')->with('success', 'ProgrammingLanguage updated successfully.');
         } catch (ValidationException $e) {
@@ -142,13 +125,10 @@ class ProgrammingLanguageController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->programmingLanguageInterface->delete((int) $id);
 
             return redirect()->route('programming-languages.index')->with('success', 'ProgrammingLanguage deleted successfully.');
         } catch (Throwable $e) {

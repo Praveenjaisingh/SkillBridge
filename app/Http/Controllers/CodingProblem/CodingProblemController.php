@@ -4,6 +4,8 @@ namespace App\Http\Controllers\CodingProblem;
 
 use App\Http\Controllers\Controller;
 use App\Services\CodingProblem\CodingProblemInterface;
+use App\Services\Skill\SkillInterface;
+use App\Services\ProgrammingLanguage\ProgrammingLanguageInterface;
 use App\Helpers\PaginationHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,20 +16,18 @@ use Throwable;
 
 class CodingProblemController extends Controller
 {
-    public function __construct(
-        protected CodingProblemInterface $service,
-        protected \App\Services\Skill\SkillInterface $skillsService,
-        protected \App\Services\ProgrammingLanguage\ProgrammingLanguageInterface $programmingLanguagesService,
-    ) {
+    protected $codingProblemInterface,$skillsInterface,$programmingLanguagesInterface;
+    public function __construct(CodingProblemInterface $codingProblemInterface,SkillInterface $skillsInterface,ProgrammingLanguageInterface $programmingLanguagesInterface,) 
+    {
+        $this->codingProblemInterface = $codingProblemInterface;
+        $this->skillsInterface = $skillsInterface;
+        $this->programmingLanguagesInterface = $programmingLanguagesInterface;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         try {
-            $codingProblems = $this->service->paginate(
+            $codingProblems = $this->codingProblemInterface->paginate(
                 $request->only(['search', 'difficulty', 'skill_id', 'programming_language_id']),
                 PaginationHelper::perPage($request)
             );
@@ -45,15 +45,12 @@ class CodingProblemController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(): Response
     {
         try {
             return Inertia::render('CodingProblem/Create', [
-            'skills' => $this->skillsService->list(),
-            'programmingLanguages' => $this->programmingLanguagesService->list(),
+            'skills' => $this->skillsInterface->list(),
+            'programmingLanguages' => $this->programmingLanguagesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('CodingProblem/Create', [
@@ -62,9 +59,6 @@ class CodingProblemController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request): RedirectResponse
     {
         try {
@@ -80,7 +74,7 @@ class CodingProblemController extends Controller
             'constraints' => 'nullable|string',
             ]);
 
-            $this->service->create($data);
+            $this->codingProblemInterface->create($data);
 
             return redirect()->route('coding-problems.index')->with('success', 'CodingProblem created successfully.');
         } catch (ValidationException $e) {
@@ -90,13 +84,10 @@ class CodingProblemController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id): Response
     {
         try {
-            $codingProblem = $this->service->find((int) $id);
+            $codingProblem = $this->codingProblemInterface->find((int) $id);
 
             return Inertia::render('CodingProblem/Show', [
                 'codingProblem' => $codingProblem,
@@ -109,18 +100,15 @@ class CodingProblemController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id): Response
     {
         try {
-            $codingProblem = $this->service->find((int) $id);
+            $codingProblem = $this->codingProblemInterface->find((int) $id);
 
             return Inertia::render('CodingProblem/Edit', [
                 'codingProblem' => $codingProblem,
-            'skills' => $this->skillsService->list(),
-            'programmingLanguages' => $this->programmingLanguagesService->list(),
+            'skills' => $this->skillsInterface->list(),
+            'programmingLanguages' => $this->programmingLanguagesInterface->list(),
             ]);
         } catch (Throwable $e) {
             return Inertia::render('CodingProblem/Edit', [
@@ -130,9 +118,6 @@ class CodingProblemController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id): RedirectResponse
     {
         try {
@@ -148,7 +133,7 @@ class CodingProblemController extends Controller
             'constraints' => 'sometimes|nullable|string',
             ]);
 
-            $this->service->update((int) $id, $data);
+            $this->codingProblemInterface->update((int) $id, $data);
 
             return redirect()->route('coding-problems.index')->with('success', 'CodingProblem updated successfully.');
         } catch (ValidationException $e) {
@@ -158,13 +143,10 @@ class CodingProblemController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id): RedirectResponse
     {
         try {
-            $this->service->delete((int) $id);
+            $this->codingProblemInterface->delete((int) $id);
 
             return redirect()->route('coding-problems.index')->with('success', 'CodingProblem deleted successfully.');
         } catch (Throwable $e) {
