@@ -11,29 +11,28 @@ use Illuminate\Support\Collection;
 
 class LessonService implements LessonInterface
 {
-    public function __construct(
-        protected LessonContract $repository
-    ) {
+    protected $lessonContract;
+    public function __construct(LessonContract $lessonContract)
+    {
+        $this->lessonContract = $lessonContract;
     }
 
     public function list(array $filters = []): Collection
     {
-        return $this->repository->all($filters);
+        return $this->lessonContract->all($filters);
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return $this->repository->paginate($filters, $perPage);
+        return $this->lessonContract->paginate($filters, $perPage);
     }
 
     public function find(int $id): Lesson
     {
-        $lesson = $this->repository->find($id);
-
+        $lesson = $this->lessonContract->find($id);
         if (! $lesson) {
             throw new ModelNotFoundException("Lesson #{$id} not found.");
         }
-
         return $lesson;
     }
 
@@ -42,9 +41,7 @@ class LessonService implements LessonInterface
         if (empty($data['slug']) && ! empty($data['title'])) {
             $data['slug'] = SlugHelper::unique($data['title'], Lesson::class);
         }
-
-        $lesson = $this->repository->create($data);
-
+        $lesson = $this->lessonContract->create($data);
         return $lesson;
     }
 
@@ -55,16 +52,13 @@ class LessonService implements LessonInterface
         if (empty($data['slug']) && ! empty($data['title'])) {
             $data['slug'] = SlugHelper::unique($data['title'], Lesson::class, $id);
         }
-
-        $model = $this->repository->update($model, $data);
-
+        $model = $this->lessonContract->update($model, $data);
         return $model;
     }
 
     public function delete(int $id): bool
     {
         $model = $this->find($id);
-
-        return $this->repository->delete($model);
+        return $this->lessonContract->delete($model);
     }
 }

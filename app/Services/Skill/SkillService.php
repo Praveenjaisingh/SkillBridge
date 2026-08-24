@@ -11,29 +11,28 @@ use Illuminate\Support\Collection;
 
 class SkillService implements SkillInterface
 {
-    public function __construct(
-        protected SkillContract $repository
-    ) {
+    protected $skillContract;
+    public function __construct(SkillContract $skillContract)
+    {
+        $this->skillContract = $skillContract;
     }
 
     public function list(array $filters = []): Collection
     {
-        return $this->repository->all($filters);
+        return $this->skillContract->all($filters);
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return $this->repository->paginate($filters, $perPage);
+        return $this->skillContract->paginate($filters, $perPage);
     }
 
     public function find(int $id): Skill
     {
-        $skill = $this->repository->find($id);
-
+        $skill = $this->skillContract->find($id);
         if (! $skill) {
             throw new ModelNotFoundException("Skill #{$id} not found.");
         }
-
         return $skill;
     }
 
@@ -42,29 +41,23 @@ class SkillService implements SkillInterface
         if (empty($data['slug']) && ! empty($data['name'])) {
             $data['slug'] = SlugHelper::unique($data['name'], Skill::class);
         }
-
-        $skill = $this->repository->create($data);
-
+        $skill = $this->skillContract->create($data);
         return $skill;
     }
 
     public function update(int $id, array $data): Skill
     {
         $model = $this->find($id);
-
         if (empty($data['slug']) && ! empty($data['name'])) {
             $data['slug'] = SlugHelper::unique($data['name'], Skill::class, $id);
         }
-
-        $model = $this->repository->update($model, $data);
-
+        $model = $this->skillContract->update($model, $data);
         return $model;
     }
 
     public function delete(int $id): bool
     {
         $model = $this->find($id);
-
-        return $this->repository->delete($model);
+        return $this->skillContract->delete($model);
     }
 }

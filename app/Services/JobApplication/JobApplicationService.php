@@ -10,52 +10,47 @@ use Illuminate\Support\Collection;
 
 class JobApplicationService implements JobApplicationInterface
 {
-    public function __construct(
-        protected JobApplicationContract $repository
-    ) {
+    protected $jobApplicationContract;
+    public function __construct(JobApplicationContract $jobApplicationContract)
+    {
+        $this->jobApplicationContract = $jobApplicationContract;
     }
 
     public function list(array $filters = []): Collection
     {
-        return $this->repository->all($filters);
+        return $this->jobApplicationContract->all($filters);
     }
 
     public function paginate(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return $this->repository->paginate($filters, $perPage);
+        return $this->jobApplicationContract->paginate($filters, $perPage);
     }
 
     public function find(int $id): JobApplication
     {
-        $jobApplication = $this->repository->find($id);
-
+        $jobApplication = $this->jobApplicationContract->find($id);
         if (! $jobApplication) {
             throw new ModelNotFoundException("JobApplication #{$id} not found.");
         }
-
         return $jobApplication;
     }
 
     public function create(array $data): JobApplication
     {
-        $jobApplication = $this->repository->create($data);
-
+        $jobApplication = $this->jobApplicationContract->create($data);
         return $jobApplication;
     }
 
     public function update(int $id, array $data): JobApplication
     {
         $model = $this->find($id);
-
-        $model = $this->repository->update($model, $data);
-
+        $model = $this->jobApplicationContract->update($model, $data);
         return $model;
     }
 
     public function delete(int $id): bool
     {
         $model = $this->find($id);
-
-        return $this->repository->delete($model);
+        return $this->jobApplicationContract->delete($model);
     }
 }
