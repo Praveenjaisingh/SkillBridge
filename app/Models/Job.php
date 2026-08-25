@@ -12,13 +12,13 @@ class Job extends Model
 {
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * Named "job_postings" to avoid colliding with Laravel's built-in
-     * queue "jobs" table.
-     */
     protected $table = 'job_postings';
+
+    protected $casts = [
+        'responsibilities' => 'array',
+        'nice_to_have' => 'array',
+        'benefits' => 'array',
+    ];
 
     protected $fillable = [
         'company_id',

@@ -12,6 +12,10 @@ class Course extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'learning_outcomes' => 'array',
+    ];
+
     protected $fillable = [
         'user_id',
         'programming_language_id',

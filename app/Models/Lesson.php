@@ -10,6 +10,10 @@ class Lesson extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'key_takeaways' => 'array',
+    ];
+
     protected $fillable = [
         'course_id',
         'title',

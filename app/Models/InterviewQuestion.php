@@ -10,6 +10,11 @@ class InterviewQuestion extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'follow_up_questions' => 'array',
+        'related_topics' => 'array',
+    ];
+
     protected $fillable = [
         'skill_id',
         'programming_language_id',

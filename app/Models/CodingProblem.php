@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CodingProblem extends Model
 {
     use HasFactory;
+    
+    protected $casts = [
+        'examples' => 'array',
+        'hints' => 'array',
+    ];
 
     protected $fillable = [
         'skill_id',

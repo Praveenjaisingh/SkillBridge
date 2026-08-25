@@ -10,6 +10,11 @@ class Company extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'benefits' => 'array',
+        'tech_stack' => 'array',
+    ];
+
     protected $fillable = [
         'name',
         'slug',
