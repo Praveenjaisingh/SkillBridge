@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Mail\ResetPasswordMail;
+use App\Mail\VerifyEmailMail;
 use App\Repositories\Skill\SkillContract;
 use App\Repositories\Skill\SkillEloquent;
 use App\Services\Skill\SkillInterface;
@@ -50,6 +52,8 @@ use App\Repositories\Bookmark\BookmarkContract;
 use App\Repositories\Bookmark\BookmarkEloquent;
 use App\Services\Bookmark\BookmarkInterface;
 use App\Services\Bookmark\BookmarkService;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -92,5 +96,22 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Use our branded Mailable instead of Laravel's default verification email.
+        VerifyEmail::toMailUsing(function (object $notifiable, string $url) {
+            return (new VerifyEmailMail($notifiable, $url))
+                ->to($notifiable->getEmailForVerification());
+        });
+
+        // Use our branded Mailable instead of Laravel's default reset-password email.
+        ResetPassword::toMailUsing(function (object $notifiable, string $token) {
+            $url = url(route('password.reset', [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ], false));
+
+            return (new ResetPasswordMail($notifiable, $url))
+                ->to($notifiable->getEmailForPasswordReset());
+        });
     }
 }
