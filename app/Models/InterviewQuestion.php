@@ -17,7 +17,7 @@ class InterviewQuestion extends Model
 
     protected $fillable = [
         'skill_id',
-        'programming_language_id',
+        'programming_language_id', 
         'question',
         'answer',
         'difficulty',
